@@ -1,5 +1,7 @@
 # asio (https://github.com/chriskohlhoff/asio) CMake support
 
+cmake_minimum_required(VERSION 3.23)
+
 project(
   asio
   LANGUAGES CXX
@@ -11,97 +13,76 @@ project(
 include(FetchContent)
 
 FetchContent_Declare(
-  asio
+  asio_repo
   GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
   GIT_TAG asio-1-36-0
+  GIT_SHALLOW TRUE
 )
 
-FetchContent_MakeAvailable(asio)
+FetchContent_MakeAvailable(asio_repo)
 
 # Header-Only library
 
-add_library(asio_header_only INTERFACE)
-add_library(asio::asio_header_only ALIAS asio_header_only)
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_compile_features(asio_header_only INTERFACE cxx_std_20)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
-file(GLOB_RECURSE asio_ALL_HEADERS ${asio_SOURCE_DIR}/asio/include/*)
+target_compile_definitions(
+  ${PROJECT_NAME}
+  INTERFACE
+    ASIO_STANDALONE
+    ASIO_NO_DEPRECATED
+)
+
+file(
+  GLOB_RECURSE asio_ALL_HEADERS
+  ${asio_repo_SOURCE_DIR}/asio/include/*.hpp
+  ${asio_repo_SOURCE_DIR}/asio/include/*.ipp
+)
 
 target_sources(
-  asio_header_only
-  PUBLIC
+  ${PROJECT_NAME}
+  INTERFACE
     FILE_SET HEADERS
-    BASE_DIRS ${asio_SOURCE_DIR}/asio/include
+    BASE_DIRS ${asio_repo_SOURCE_DIR}/asio/include
     FILES
       ${asio_ALL_HEADERS}
 )
 
-# Separate Compilation (static) library
-
-add_library(asio_separate_compilation STATIC)
-add_library(asio::asio_separate_compilation ALIAS asio_separate_compilation)
-
-target_compile_definitions(
-  asio_separate_compilation
-  PUBLIC
-    ASIO_SEPARATE_COMPILATION
-)
-
-target_link_libraries(
-  asio_separate_compilation
-  PUBLIC
-    asio::asio_header_only
-)
-
-target_sources(
-  asio_separate_compilation
-  PRIVATE
-    ${asio_SOURCE_DIR}/asio/src/asio.cpp
-)
-
-# Separate Compilation (shared) library
-
-add_library(asio_separate_compilation_shared SHARED)
-add_library(
-  asio::asio_separate_compilation_shared
-  ALIAS asio_separate_compilation_shared
-)
-
-target_compile_definitions(
-  asio_separate_compilation_shared
-  PUBLIC
-    ASIO_SEPARATE_COMPILATION
-    ASIO_DYN_LINK
-)
-
-target_link_libraries(
-  asio_separate_compilation_shared
-  PUBLIC
-    asio::asio_header_only
-)
-
-target_sources(
-  asio_separate_compilation_shared
-  PRIVATE
-    ${asio_SOURCE_DIR}/asio/src/asio.cpp
+set_target_properties(
+  ${PROJECT_NAME}
+  PROPERTIES
+    VERIFY_INTERFACE_HEADER_SETS ON
 )
 
 # Installation
 
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-install(
-  TARGETS
-    asio_header_only
-    asio_separate_compilation
-    asio_separate_compilation_shared
-  EXPORT asio_targets
-  FILE_SET HEADERS
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
 )
 
 install(
-  EXPORT asio_targets
-  FILE asioConfig.cmake
-  NAMESPACE asio::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/asio
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}_targets
+  FILE_SET HEADERS
+  COMPONENT ${PROJECT_NAME}
+)
+
+install(
+  EXPORT ${PROJECT_NAME}_targets
+  FILE ${PROJECT_NAME}Config.cmake
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+  COMPONENT ${PROJECT_NAME}
 )
