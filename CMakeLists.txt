@@ -35,6 +35,31 @@ target_compile_definitions(
     ASIO_NO_DEPRECATED
 )
 
+# Fix warning : "Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately."
+# https://stackoverflow.com/a/71452642/23061769
+if(WIN32 AND CMAKE_SYSTEM_VERSION)
+  macro(get_win32_winnt outvar)
+    string(REGEX MATCH "^([0-9]+)\\.([0-9]+)" ${outvar} ${CMAKE_SYSTEM_VERSION})
+    math(
+      EXPR ${outvar} "(${CMAKE_MATCH_1} << 8) + ${CMAKE_MATCH_2}"
+      OUTPUT_FORMAT HEXADECIMAL
+    )
+  endmacro()
+
+  if(NOT DEFINED _WIN32_WINNT)
+    get_win32_winnt(ver)
+    set(_WIN32_WINNT ${ver})
+    message(STATUS "Set _WIN32_WINNT=${_WIN32_WINNT}")
+  endif()
+
+  target_compile_definitions(
+    ${PROJECT_NAME}
+    INTERFACE
+      _WIN32_WINNT=${_WIN32_WINNT}
+      WIN32_LEAN_AND_MEAN
+  )
+endif()
+
 file(
   GLOB_RECURSE asio_ALL_HEADERS
   ${asio_repo_SOURCE_DIR}/asio/include/*.hpp
@@ -55,6 +80,9 @@ set_target_properties(
   PROPERTIES
     VERIFY_INTERFACE_HEADER_SETS ON
 )
+
+find_package(Threads REQUIRED)
+target_link_libraries(asio INTERFACE Threads::Threads)
 
 # Installation
 
