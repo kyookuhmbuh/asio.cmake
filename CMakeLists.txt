@@ -2,20 +2,19 @@
 
 cmake_minimum_required(VERSION 3.23)
 
-project(
-  asio
+project(asio
+  VERSION 1.38.0
+  DESCRIPTION "Asio is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ approach."
   LANGUAGES CXX
-  VERSION 1.36.0
 )
 
 # Sources
 
 include(FetchContent)
 
-FetchContent_Declare(
-  asio_repo
+FetchContent_Declare(asio_repo
   GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-  GIT_TAG asio-1-36-0
+  GIT_TAG asio-1-38-0
   GIT_SHALLOW TRUE
 )
 
@@ -28,8 +27,7 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
-target_compile_definitions(
-  ${PROJECT_NAME}
+target_compile_definitions(${PROJECT_NAME}
   INTERFACE
     ASIO_STANDALONE
     ASIO_NO_DEPRECATED
@@ -52,31 +50,27 @@ if(WIN32 AND CMAKE_SYSTEM_VERSION)
     message(STATUS "Set _WIN32_WINNT=${_WIN32_WINNT}")
   endif()
 
-  target_compile_definitions(
-    ${PROJECT_NAME}
+  target_compile_definitions(${PROJECT_NAME}
     INTERFACE
       _WIN32_WINNT=${_WIN32_WINNT}
       WIN32_LEAN_AND_MEAN
   )
 endif()
 
-file(
-  GLOB_RECURSE asio_ALL_HEADERS
-  ${asio_repo_SOURCE_DIR}/asio/include/*.hpp
-  ${asio_repo_SOURCE_DIR}/asio/include/*.ipp
+file(GLOB_RECURSE asio_ALL_HEADERS
+  ${asio_repo_SOURCE_DIR}/include/*.hpp
+  ${asio_repo_SOURCE_DIR}/include/*.ipp
 )
 
-target_sources(
-  ${PROJECT_NAME}
+target_sources(${PROJECT_NAME}
   INTERFACE
     FILE_SET HEADERS
-    BASE_DIRS ${asio_repo_SOURCE_DIR}/asio/include
+    BASE_DIRS ${asio_repo_SOURCE_DIR}/include
     FILES
       ${asio_ALL_HEADERS}
 )
 
-set_target_properties(
-  ${PROJECT_NAME}
+set_target_properties(${PROJECT_NAME}
   PROPERTIES
     VERIFY_INTERFACE_HEADER_SETS ON
 )
