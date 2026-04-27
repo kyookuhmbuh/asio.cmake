@@ -10,13 +10,23 @@ project(asio
 
 option(ASIO_ENABLE_INSTALL "Enable installation rules. Default: ON." ON)
 
+set(ASIO_GIT_REPOSITORY
+    "https://github.com/chriskohlhoff/asio.git"
+    CACHE STRING "Git repository for Asio sources"
+)
+
+set(ASIO_GIT_TAG
+    "asio-1-38-0"
+    CACHE STRING "Git tag for Asio sources"
+)
+
 # Sources
 
 include(FetchContent)
 
 FetchContent_Declare(asio_repo
-  GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-  GIT_TAG asio-1-38-0
+  GIT_REPOSITORY "${ASIO_GIT_REPOSITORY}"
+  GIT_TAG "${ASIO_GIT_TAG}"
   GIT_SHALLOW TRUE
 )
 
