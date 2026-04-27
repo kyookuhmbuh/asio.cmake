@@ -8,6 +8,8 @@ project(asio
   LANGUAGES CXX
 )
 
+option(ASIO_ENABLE_INSTALL "Enable installation rules. Default: ON." ON)
+
 # Sources
 
 include(FetchContent)
@@ -79,32 +81,33 @@ find_package(Threads REQUIRED)
 target_link_libraries(asio INTERFACE Threads::Threads)
 
 # Installation
+if(ASIO_ENABLE_INSTALL)
+  include(GNUInstallDirs)
+  include(CMakePackageConfigHelpers)
 
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
 
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
+  install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+  )
 
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
+  install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}_targets
+    FILE_SET HEADERS
+    COMPONENT ${PROJECT_NAME}
+  )
 
-install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}_targets
-  FILE_SET HEADERS
-  COMPONENT ${PROJECT_NAME}
-)
-
-install(
-  EXPORT ${PROJECT_NAME}_targets
-  FILE ${PROJECT_NAME}Config.cmake
-  NAMESPACE ${PROJECT_NAME}::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-  COMPONENT ${PROJECT_NAME}
-)
+  install(
+    EXPORT ${PROJECT_NAME}_targets
+    FILE ${PROJECT_NAME}Config.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    COMPONENT ${PROJECT_NAME}
+  )
+endif(ASIO_ENABLE_INSTALL)
