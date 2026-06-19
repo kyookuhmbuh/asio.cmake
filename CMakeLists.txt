@@ -43,6 +43,7 @@ target_compile_definitions(${PROJECT_NAME}
   INTERFACE
     ASIO_STANDALONE
     ASIO_NO_DEPRECATED
+    ASIO_ENABLE_VERSION_NAMESPACE
 )
 
 # Fix warning : "Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately."
