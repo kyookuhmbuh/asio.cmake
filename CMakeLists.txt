@@ -20,6 +20,11 @@ set(ASIO_GIT_TAG
     CACHE STRING "Git tag for Asio sources"
 )
 
+set(ASIO_COMPILE_DEFINITIONS
+    "ASIO_STANDALONE;ASIO_NO_DEPRECATED;ASIO_ENABLE_VERSION_NAMESPACE"
+    CACHE STRING "Semicolon-separated list of compile definitions for Asio"
+)
+
 # Sources
 
 include(FetchContent)
@@ -38,13 +43,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
-
-target_compile_definitions(${PROJECT_NAME}
-  INTERFACE
-    ASIO_STANDALONE
-    ASIO_NO_DEPRECATED
-    ASIO_ENABLE_VERSION_NAMESPACE
-)
+target_compile_definitions(${PROJECT_NAME} INTERFACE ${ASIO_COMPILE_DEFINITIONS})
 
 # Fix warning : "Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately."
 # https://stackoverflow.com/a/71452642/23061769
