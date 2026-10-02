@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(asio
-  VERSION 1.38.0
+  VERSION 1.38.2
   DESCRIPTION "Asio is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ approach."
   LANGUAGES CXX
 )
@@ -16,7 +16,7 @@ set(ASIO_GIT_REPOSITORY
 )
 
 set(ASIO_GIT_TAG
-    "asio-1-38-0"
+    "asio-1-38-2"
     CACHE STRING "Git tag for Asio sources"
 )
 
